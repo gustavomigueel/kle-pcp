@@ -1,23 +1,23 @@
-# app.py
 import streamlit as st
 import pandas as pd
 import datetime
-import streamlit_authenticator as stauth
-import yaml
+# --- Remova essas linhas ---
+# import streamlit_authenticator as stauth
+# import yaml
+# -------------------------------
 
-# --- Authentication setup ---
-users = {
-    "admin": {"password": stauth.Hasher(['admin123']).generate()[0], "name": "Administrador"},
-}
-credentials = {"usernames": users}
-authenticator = stauth.Authenticate(
-    credentials,
-    'ppc_cookie', 'ppc_signature', cookie_expiry_days=1
-)
-name, authentication_status, username = authenticator.login('Login', 'main')
-if not authentication_status:
-    st.warning('Usuário ou senha incorretos')
+# --- Autenticação simples ---
+st.sidebar.header("🔒 Login")
+username = st.sidebar.text_input("Usuário")
+password = st.sidebar.text_input("Senha", type="password")
+if username != "admin" or password != "admin123":
+    st.sidebar.error("Usuário ou senha incorretos")
     st.stop()
+
+# --- O resto do app permanece igual ---
+st.title('Sistema PCP - Roteiros de Produção')
+# ...
+
 
 # --- Title ---
 st.title('Sistema PCP - Roteiros de Produção')
