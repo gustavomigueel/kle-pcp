@@ -1,4 +1,3 @@
-```python
 import streamlit as st
 import pandas as pd
 import datetime
@@ -81,13 +80,10 @@ if st.button('Gerar RP3'):
 
 # --- Download da base atualizada ---
 st.header('Banco Atualizado')
-
 # Gera arquivo em memória
 buffer = pd.ExcelWriter('db_atualizado.xlsx', engine='xlsxwriter')
 pedidos.to_excel(buffer, index=False, sheet_name='Pedidos_Gerais')
 skus.to_excel(buffer, index=False, sheet_name='Base_SKUs')
 buffer.save()
-
 # Botão de download
 tmp_download = st.download_button('Baixar base atualizada', 'db_atualizado.xlsx')
-```
