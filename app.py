@@ -23,7 +23,7 @@ st.title('Sistema PCP - Roteiros de Produção')
 st.title('Sistema PCP - Roteiros de Produção')
 
 # --- File upload ---
-uploaded_file = st.file_uploader('Carregar base Excel', type=['xlsx','xlsm'])
+uploaded_file = st.file_uploader('Carregar base Excel', type=['xlsx','xlsm','xlsb'])
 if not uploaded_file:
     st.info('Por favor, carregue um arquivo Excel')
     st.stop()
