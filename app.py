@@ -24,27 +24,37 @@ if not uploaded_file:
 def load_data(file):
     import pandas as pd
     fname = file.name.lower()
-    # Carrega o arquivo
+    # Abre o Excel com engine apropriado
     if fname.endswith('.xlsb'):
         xls = pd.ExcelFile(file, engine='pyxlsb')
     else:
         xls = pd.ExcelFile(file)
-    # Mostra abas para debug (remova depois)
+    # Debug: exibe abas e colunas
     st.sidebar.write("Abas no arquivo:", xls.sheet_names)
-    # Tenta encontrar as duas abas-padrão
-    sheet_ped = next((s for s in xls.sheet_names if s.lower().startswith('pedidos')), xls.sheet_names[0])
-    sheet_sku = next((s for s in xls.sheet_names if s.lower().startswith('base_sku') or s.lower().startswith('sku')), 
-                     xls.sheet_names[1] if len(xls.sheet_names)>1 else xls.sheet_names[0])
-    # Faz a leitura
+    # Escolhe as sheets padrão
+    sheet_ped = next((s for s in xls.sheet_names if 'pedido' in s.lower()), xls.sheet_names[0])
+    sheet_sku = next((s for s in xls.sheet_names if 'sku' in s.lower()), xls.sheet_names[0])
+    # Lê as tabelas
     pedidos = xls.parse(sheet_ped)
     skus    = xls.parse(sheet_sku)
-    # Concatena data+hora (ajuste nomes se diferente)
-    pedidos['Timestamp'] = pd.to_datetime(
-        pedidos['DataEntrada'].astype(str) + ' ' + pedidos['HoraEntrada'].astype(str),
-        dayfirst=True, errors='coerce'
-    )
+    # Debug: colunas detectadas
+    st.sidebar.write("Colunas Pedidos:", pedidos.columns.tolist())
+    # Detecta automaticamente colunas de data e hora
+    date_cols = [c for c in pedidos.columns if 'data' in c.lower()]
+    time_cols = [c for c in pedidos.columns if 'hora' in c.lower()]
+    date_col = date_cols[0] if date_cols else pedidos.columns[0]
+    time_col = time_cols[0] if time_cols else None
+    # Constrói Timestamp
+    if time_col:
+        pedidos['Timestamp'] = pd.to_datetime(
+            pedidos[date_col].astype(str) + ' ' + pedidos[time_col].astype(str),
+            dayfirst=True, errors='coerce'
+        )
+    else:
+        pedidos['Timestamp'] = pd.to_datetime(
+            pedidos[date_col], dayfirst=True, errors='coerce'
+        )
     return pedidos, skus
-
 
 # --- Carrega dados ---
 pedidos, skus = load_data(uploaded_file)
