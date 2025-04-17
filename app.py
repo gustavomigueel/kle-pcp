@@ -31,14 +31,18 @@ if not uploaded_file:
 # --- Read Excel ---
 @st.cache_data
 def load_data(file):
-    xls = pd.ExcelFile(file)
+    import os
+    fname = file.name.lower()
+    if fname.endswith('.xlsb'):
+        xls = pd.ExcelFile(file, engine='pyxlsb')
+    else:
+        xls = pd.ExcelFile(file)
     pedidos = xls.parse('Pedidos_Gerais')
     skus    = xls.parse('Base_SKUs')
-    # Ensure types
+    # concatena data+hora (ajuste nomes de colunas conforme seu Excel)
     pedidos['Timestamp'] = pd.to_datetime(pedidos['DataEntrada'].astype(str) + ' ' + pedidos['HoraEntrada'].astype(str))
     return pedidos, skus
 
-pedidos, skus = load_data(uploaded_file)
 
 # --- Settings ---
 st.sidebar.header('Configuração de Cortes')
