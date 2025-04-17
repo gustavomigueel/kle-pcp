@@ -22,18 +22,29 @@ if not uploaded_file:
 # --- Função para ler Excel usando engine adequado ---
 @st.cache_data
 def load_data(file):
+    import pandas as pd
     fname = file.name.lower()
+    # Carrega o arquivo
     if fname.endswith('.xlsb'):
         xls = pd.ExcelFile(file, engine='pyxlsb')
     else:
         xls = pd.ExcelFile(file)
-    pedidos = xls.parse('Pedidos_Gerais')
-    skus    = xls.parse('Base_SKUs')
-    # Ajuste conforme nome das colunas de data e hora
+    # Mostra abas para debug (remova depois)
+    st.sidebar.write("Abas no arquivo:", xls.sheet_names)
+    # Tenta encontrar as duas abas-padrão
+    sheet_ped = next((s for s in xls.sheet_names if s.lower().startswith('pedidos')), xls.sheet_names[0])
+    sheet_sku = next((s for s in xls.sheet_names if s.lower().startswith('base_sku') or s.lower().startswith('sku')), 
+                     xls.sheet_names[1] if len(xls.sheet_names)>1 else xls.sheet_names[0])
+    # Faz a leitura
+    pedidos = xls.parse(sheet_ped)
+    skus    = xls.parse(sheet_sku)
+    # Concatena data+hora (ajuste nomes se diferente)
     pedidos['Timestamp'] = pd.to_datetime(
-        pedidos['DataEntrada'].astype(str) + ' ' + pedidos['HoraEntrada'].astype(str)
+        pedidos['DataEntrada'].astype(str) + ' ' + pedidos['HoraEntrada'].astype(str),
+        dayfirst=True, errors='coerce'
     )
     return pedidos, skus
+
 
 # --- Carrega dados ---
 pedidos, skus = load_data(uploaded_file)
